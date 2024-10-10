@@ -4,6 +4,7 @@
 from pathlib import Path
 
 import environ
+import os
 
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 # cash_send/
@@ -45,7 +46,20 @@ LOCALE_PATHS = [str(BASE_DIR / "locale")]
 # DATABASES
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
-DATABASES = {"default": env.db("DATABASE_URL")}
+
+# DATABASES = {"default": env.db("DATABASE_URL")}
+
+DATABASES = {
+    'default' : {
+         'ENGINE':'django.db.backends.postgresql',
+        'NAME': 'cash_send',
+        'USER':'postgres',
+         'PASSWORD':'Davide2020@@',
+         'HOST':'localhost',
+        'PORT':'5432',
+    }
+ }
+
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
 # https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-DEFAULT_AUTO_FIELD
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -69,6 +83,11 @@ DJANGO_APPS = [
     # "django.contrib.humanize", # Handy template tags
     "django.contrib.admin",
     "django.forms",
+    "rest_framework",
+    "accounts",
+    "audits",
+    "transactions",
+    
 ]
 THIRD_PARTY_APPS = [
     "crispy_forms",
