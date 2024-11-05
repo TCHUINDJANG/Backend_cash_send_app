@@ -5,6 +5,15 @@ from pathlib import Path
 
 import environ
 import os
+from decouple import config
+from . info import *
+
+EMAIL_USE_TLS = EMAIL_USE_TLS
+EMAIL_HOST = EMAIL_HOST
+EMAIL_HOST_USER = EMAIL_HOST_USER 
+EMAIL_HOST_PASSWORD = EMAIL_HOST_PASSWORD
+EMAIL_PORT = EMAIL_PORT
+
 
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 # cash_send/
@@ -51,12 +60,12 @@ LOCALE_PATHS = [str(BASE_DIR / "locale")]
 
 DATABASES = {
     'default' : {
-         'ENGINE':'django.db.backends.postgresql',
-        'NAME': 'cash_send',
-        'USER':'postgres',
-         'PASSWORD':'Davide2020@@',
-         'HOST':'localhost',
-        'PORT':'5432',
+        'ENGINE':'django.db.backends.postgresql',
+        'NAME': config('POSTGRES_DB'),
+        'USER':  config('POSTGRES_USER'),
+        'PASSWORD': config('POSTGRES_PASSWORD'),
+        'HOST':config('POSTGRES_HOST'),
+        'PORT':config('POSTGRES_PORT'),
     }
  }
 
@@ -83,10 +92,8 @@ DJANGO_APPS = [
     # "django.contrib.humanize", # Handy template tags
     "django.contrib.admin",
     "django.forms",
-    "rest_framework",
-    "accounts",
-    "audits",
-    "transactions",
+
+    
     
 ]
 THIRD_PARTY_APPS = [
@@ -104,7 +111,9 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
-    "cash_send.users",
+    "accounts",
+    "audits",
+    "transactions",
     # Your stuff: custom apps go here
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -123,7 +132,7 @@ AUTHENTICATION_BACKENDS = [
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-user-model
-AUTH_USER_MODEL = "users.User"
+AUTH_USER_MODEL = "accounts.UserRegistrationModel"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url
 LOGIN_REDIRECT_URL = "users:redirect"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-url
@@ -208,7 +217,7 @@ TEMPLATES = [
                 "django.template.context_processors.static",
                 "django.template.context_processors.tz",
                 "django.contrib.messages.context_processors.messages",
-                "cash_send.users.context_processors.allauth_settings",
+                # "cash_send.users.context_processors.allauth_settings",
             ],
         },
     },
@@ -286,7 +295,7 @@ if USE_TZ:
     # https://docs.celeryq.dev/en/stable/userguide/configuration.html#std:setting-timezone
     CELERY_TIMEZONE = TIME_ZONE
 # https://docs.celeryq.dev/en/stable/userguide/configuration.html#std:setting-broker_url
-CELERY_BROKER_URL = env("CELERY_BROKER_URL")
+CELERY_BROKER_URL = config("CELERY_BROKER_URL")
 # https://docs.celeryq.dev/en/stable/userguide/configuration.html#std:setting-result_backend
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 # https://docs.celeryq.dev/en/stable/userguide/configuration.html#result-extended
@@ -328,13 +337,13 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 # https://docs.allauth.org/en/latest/account/configuration.html
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 # https://docs.allauth.org/en/latest/account/configuration.html
-ACCOUNT_ADAPTER = "cash_send.users.adapters.AccountAdapter"
+# ACCOUNT_ADAPTER = "cash_send.users.adapters.AccountAdapter"
 # https://docs.allauth.org/en/latest/account/forms.html
-ACCOUNT_FORMS = {"signup": "cash_send.users.forms.UserSignupForm"}
+# ACCOUNT_FORMS = {"signup": "cash_send.users.forms.UserSignupForm"}
 # https://docs.allauth.org/en/latest/socialaccount/configuration.html
-SOCIALACCOUNT_ADAPTER = "cash_send.users.adapters.SocialAccountAdapter"
+# SOCIALACCOUNT_ADAPTER = "cash_send.users.adapters.SocialAccountAdapter"
 # https://docs.allauth.org/en/latest/socialaccount/configuration.html
-SOCIALACCOUNT_FORMS = {"signup": "cash_send.users.forms.UserSocialSignupForm"}
+# SOCIALACCOUNT_FORMS = {"signup": "cash_send.users.forms.UserSocialSignupForm"}
 
 # django-rest-framework
 # -------------------------------------------------------------------------------
