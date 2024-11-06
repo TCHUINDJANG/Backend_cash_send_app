@@ -1,14 +1,15 @@
 from django.conf import settings
 from rest_framework.routers import DefaultRouter
 from rest_framework.routers import SimpleRouter
+from rest_framework import views
 
 # from cash_send.users.api.views import *
-from accounts.views import AccountviewViewSet
+
 
 router = DefaultRouter() if settings.DEBUG else SimpleRouter()
 
 # router.register("users", UserViewSet)
-router.register("accounts" , AccountviewViewSet)
+# router.register("accounts" , views.)
 
 
 app_name = "api"

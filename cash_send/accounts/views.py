@@ -7,7 +7,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate, login , logout
 from django.contrib import messages 
-from accounts import settings
 from django.core.mail  import send_mail , EmailMessage
 from django.utils.http import urlsafe_base64_decode , urlsafe_base64_encode
 from django.utils.encoding import force_bytes 
@@ -15,42 +14,170 @@ from django.template.loader import render_to_string
 from django.views.decorators.http import require_http_methods
 from rest_framework.decorators import api_view
 from django.shortcuts import get_object_or_404
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_registration.api.views.reset_password import reset_password
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_registration.api.views.register import RegisterSigner
+from rest_registration.api.views.login import login
+from rest_registration.api.views.change_password import change_password
+from rest_registration.api.views.profile import profile
+from rest_registration.api.views.register_email import register_email
+from rest_registration.api.views import register
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from .serialize import ProfileSerializer
+from rest_framework_registration.views import PasswordResetView
+import random
+from twilio.rest import Client
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.conf import settings
 
 
 
-@api_view(['POST'])
-def api_view_register(request , pk=None, *args, **kwargs):
-    if request.method == "POST":
-        data = request.data
-        serializer = UserRegistrationModelSerializer(data=data)
-        if serializer.is_valid(raise_exception=True):
-            username = serializer.validated_data.get('username')
-            lastname = serializer.validated_data.get('lastname')
-            password = serializer.validated_data.get('password')
-            password2 = serializer.validated_data.get('password')
-            phone_number = serializer.validated_data.get('phone_number')
-            email = serializer.validated_data.get('email')
-        if UserRegistrationModel.objects.filter(username=username):
-            messages.error(request , "ce nom a deja ete utilise pour creer un compte")
-            return redirect('register')
-        if UserRegistrationModel.objects.filter(email =email):
-            messages.error(request , "Cet email possede deja un compte")
-        if not username.isalnum():
-            messages.error(request , "Le nom doit etre alphanumerique")
-            return redirect('register')
-        if password != password2:
-            messages.error(request , "Les mots de passe ne sont pas egaux")
-        user_create = UserRegistrationModel.objects.create(username ,lastname, password, phone_number , email)
-        user_create.lastname = lastname
-        user_create.phone_number = phone_number
-        user_create.email = email
-        user_create.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    subject = "Bienvenu chez SEND CASH MONEY"
-    message = "Bienvenue" + user_create.username + "" + user_create.lastname + "/n Nus sommes heureux de vous recevoir"
-    from_email = settings.EMAIL_HOST_USER
-    to_list = [user_create.email]
-    send_mail(subject , message , from_email , to_list  , fail_silently=False)
+
+class RegisterUserView(RegistrationView):
+    permission_classes = [AllowAny]
+
+class LoginUserView(LoginView):
+    permission_classes = [AllowAny]
+
+
+
+
+class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        profile = Profile.objects.get(user=request.user)
+        serializer = ProfileSerializer(profile)
+        return Response(serializer.data)
+
+    def put(self, request):
+        profile = Profile.objects.get(user=request.user)
+        serializer = ProfileSerializer(profile, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
-    return render(request , '')
+
+class CustomPasswordResetView(PasswordResetView):
+    # Personnalisation si nécessaire
+    pass
+
+
+
+class SendPhoneVerificationCode(APIView):
+    def post(self , request):
+        phone_number = request.data.get('phone_number')
+        if not phone_number:
+            return Response({"detail": "Le numéro de téléphone est requis."}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = UserRegistrationModel.objects.filter(phone=phone_number).first()
+        if not user:
+            return Response({"detail": "Utilisateur non trouvé."}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Générer un code de vérification à 6 chiffres
+        verification_code = random.randint(100000, 999999)
+        # Utilisation de Twilio pour envoyer le SMS
+
+        client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+        message = client.messages.create(
+            body=f"Votre code de verification est : {verification_code}",
+            from_=settings.TWILIO_PHONE_NUMBER,
+            to=phone_number
+        )
+
+        # Sauvegarde du code dans la base de données ou dans un cache temporaire
+        # Il est conseillé de stocker ce code et de le valider dans une autre vue
+
+        user.verification_code = verification_code
+        user.save()
+        return Response({"detail": "Code de vérification envoyé."}, status=status.HTTP_200_OK)
+    
+
+class VerifyPhoneNumber(APIView):
+    def post(self , request):
+        phone_number = request.data.get("phone_number")
+        verification_code = request.data.get("verification_code")
+
+
+        user = UserRegistrationModel.objects.filter(phone=phone_number).first()
+        if not user:
+            return Response({"detail": "Utilisateur non trouvé."}, status=status.HTTP_404_NOT_FOUND)
+        # Vérifier le code de vérification
+        if str(user.verification_code) != (verification_code):
+            return Response({"detail": "Code de vérification invalide."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Mettre à jour le statut de l'utilisateur
+
+        user.is_verified_phone = True
+        user.save()
+        return Response({"detail": "Numéro de téléphone vérifié avec succès."}, status=status.HTTP_200_OK)
+
+
+
+
+class PasswordResetResquestView(APIView):
+    permission_classes = [AllowAny]
+
+
+    def post(self , request):
+        email = request.data.get('email')
+        if not email:
+            return Response({"detail": "L'email est requis."}, status=400)
+        user = UserRegistrationModel.objects.filter(email=email).first()
+        if not user:
+            return Response({"detail": "Utilisateur non trouvé."}, status=404)
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(str(user.pk).encode())
+
+
+         # Crée le lien de réinitialisation
+        reset_link = f'http://tonsite.com/reset-password/{uid}/{token}/'
+
+
+
+        # Envoie l'email
+        send_mail(
+            'Réinitialisation du mot de passe',
+            f'Cliquez sur ce lien pour réinitialiser votre mot de passe: {reset_link}',
+            'noreply@tonsite.com',
+            [email],
+            fail_silently=False,
+        )
+
+        return Response({"detail": "Un email avec les instructions a été envoyé."}, status=200)
+    
+
+
+class DeleteUserView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self , request):
+        user = request.user
+        user.delete()
+        return Response({"detail": "Utilisateur supprimé avec succès."}, status=status.HTTP_204_NO_CONTENT)
+
+
+
+
+
+
+
+
+
+
+
+
+
+           
+
+
+
+

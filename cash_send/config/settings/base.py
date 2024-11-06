@@ -7,7 +7,10 @@ import environ
 import os
 from decouple import config
 from . info import *
+import datetime
 
+
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = EMAIL_USE_TLS
 EMAIL_HOST = EMAIL_HOST
 EMAIL_HOST_USER = EMAIL_HOST_USER 
@@ -24,6 +27,48 @@ READ_DOT_ENV_FILE = env.bool("DJANGO_READ_DOT_ENV_FILE", default=False)
 if READ_DOT_ENV_FILE:
     # OS environment variables take precedence over variables from .env
     env.read_env(str(BASE_DIR / ".env"))
+
+
+
+
+# URL de la vérification de l'email lors de l'inscription
+REGISTER_EMAIL_VERIFICATION_URL = 'https://ton-site.com/verify-email/{uid}/{token}/'
+
+# URL de réinitialisation du mot de passe
+RESET_PASSWORD_VERIFICATION_URL = 'https://ton-site.com/reset-password/{uid}/{token}/'
+
+# URL de confirmation de l'inscription de l'utilisateur
+REGISTER_VERIFICATION_URL = 'https://ton-site.com/verify-registration/{uid}/{token}/'
+
+
+VERIFICATION_FROM_EMAIL = 'send_money@.com'
+
+# Paramètres rest-registrations
+REST_REGISTRATION = {
+    'REGISTER_EMAIL_VERIFICATION': True,  # Active la vérification par email pour l'inscription
+    'REGISTER_EMAIL_SUBJECT': 'Bienvenue sur notre plateforme',  # Sujet de l'email de bienvenue
+    'RESET_PASSWORD_EMAIL_SUBJECT': 'Réinitialisation de votre mot de passe',  # Sujet pour la réinitialisation du mot de passe
+    'RESET_PASSWORD_VERIFICATION_URL': RESET_PASSWORD_VERIFICATION_URL,  # URL de réinitialisation
+    'REGISTER_VERIFICATION_URL': REGISTER_VERIFICATION_URL,  # URL de vérification de l'inscription
+    'REGISTER_EMAIL_VERIFICATION_URL': REGISTER_EMAIL_VERIFICATION_URL,  # URL de vérification de l'email
+    'VERIFICATION_FROM_EMAIL': VERIFICATION_FROM_EMAIL,  # Email d'expéditeur
+}
+
+
+
+# Authentification par email uniquement
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  # Force la vérification par email après inscription
+
+
+#configuration envoit des sms par le telephone
+TWILIO_ACCOUNT_SID = 'ton_account_sid'
+TWILIO_AUTH_TOKEN = 'ton_auth_token'
+TWILIO_PHONE_NUMBER = 'ton_numero_twilio'
+
 
 # GENERAL
 # ------------------------------------------------------------------------------
@@ -94,7 +139,6 @@ DJANGO_APPS = [
     "django.forms",
 
     
-    
 ]
 THIRD_PARTY_APPS = [
     "crispy_forms",
@@ -108,7 +152,44 @@ THIRD_PARTY_APPS = [
     "rest_framework.authtoken",
     "corsheaders",
     "drf_spectacular",
+    "rest_registration",
 ]
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=5),
+    'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=1),
+}
+
+
+
+
+# settings.py
+
+# REST_REGISTRATION = {
+#     'REGISTER_EMAIL_VERIFICATION': True,  # Activation de la vérification par email
+#     'REGISTER_EMAIL_SUBJECT': 'Bienvenue sur notre plateforme',  # Sujet de l'email d'inscription
+#     'RESET_PASSWORD_EMAIL_SUBJECT': 'Réinitialisation de votre mot de passe',  # Sujet de l'email de réinitialisation
+# }
+
+# Configuration de l'email backend (si nécessaire)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Utilise ce backend pour le développement
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+}
+
+
+
 
 LOCAL_APPS = [
     "accounts",

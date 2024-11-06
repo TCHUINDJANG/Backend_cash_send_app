@@ -58,11 +58,11 @@ class Notification (Base_cash_send):
 
 
 class Devise (Base_cash_send):
-    code = models.Charfield(choices=devices)
+    code = models.CharField(choices=devices)
     exchange_rate = models.DecimalField(max_digits=10, decimal_places=4)  # Taux de change
     last_updated = models.DateTimeField(auto_now=True)  # Date de la dernière mise à jour
     class Meta:
-            ordering = ['-transaction_id'] 
+            ordering = ['-code'] 
 
     def __str__(self):
              return self.code

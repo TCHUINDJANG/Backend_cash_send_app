@@ -25,14 +25,17 @@ class Country(Base_cash_send):
     
 
 class UserRegistrationModel(AbstractUser):
-    phone_number = models.IntegerField(("phone Number"))
+    phone_number = models.CharField(max_length=15, unique=True, null=True, blank=True)
     country = models.ForeignKey(Country ,on_delete=models.SET_NULL , null=True  , blank=True )
+    is_verified_phone = models.BooleanField(default=False)
+    is_verified_email = models.BooleanField(default=False)
+    verification_code = models.BooleanField(default=False)
    
     class Meta:
             ordering = ['-country'] 
 
     def __str__(self):
-             return self.phone_number
+             return self.username
     
 
 
@@ -57,12 +60,13 @@ class Profile(Base_cash_send):
     birth_day = models.DateField(null=True , blank=True)
     bio = models.TextField(blank=True)
     email = models.EmailField()
+    profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
 
     class Meta:
             ordering = ['-user'] 
 
     def __str__(self):
-             return self.user
+             return f"{self.first_name} {self.last_name}"
     
 
 
