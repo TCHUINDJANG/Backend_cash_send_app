@@ -4,6 +4,7 @@ from accounts.models import Base_cash_send
 from django.contrib.auth import get_user_model 
 
 
+
 User = get_user_model()
 # from .models import UserRegistrationModel
 
@@ -13,18 +14,24 @@ devices = (('EURO' , 'euro') , ('FCFA' , 'fcfa') , ('DOLLARS'  , 'dollars') , ('
 
 
 class Transaction (Base_cash_send):
-    sender_account_id = models.EmailField(('sender'),max_length=100)
-    receiver_account_id  = models.CharField(('receiver'), max_length=100)
-    price = models.IntegerField(("montant"))
+    sender = models.EmailField(User,max_length=100)
+    receiver   = models.CharField(User, max_length=100)
+    amount  = models.IntegerField(("montant"))
     devise = models.CharField(choices=devices)
     statut = models.CharField(choices = status)
     user = models.ManyToManyField(User)
+        #  transaction_date = models.DateTimeField(auto_now_add=True)
+        # currency_to = models.ForeignKey(Devise, related_name='currency_to', on_delete=models.CASCADE)
+        # currency_from = models.ForeignKey(Currency, related_name='currency_from', on_delete=models.CASCADE)
+        # taux_exchange = models.DecimalField(max_digits=10, decimal_places=4)
+
+
     
     class Meta:
             ordering = ['-date_of_creation'] 
 
     def __str__(self):
-             return self.price
+             return f"Transaction from {self.sender.username} to {self.receiver.username}"
     
 
 

@@ -2,6 +2,13 @@ import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser 
 
+
+ROLE_CHOICES = [
+        ('user', 'Utilisateur'),
+        ('admin', 'Administrateur'),
+        ('operator', 'Opérateur de transaction'),
+    ]
+
 class Base_cash_send(models.Model):
     id = models.UUIDField(primary_key=True , default=uuid.uuid4 , editable=False)
     date_of_update = models.DateTimeField(auto_created=True)
@@ -30,6 +37,8 @@ class UserRegistrationModel(AbstractUser):
     is_verified_phone = models.BooleanField(default=False)
     is_verified_email = models.BooleanField(default=False)
     verification_code = models.BooleanField(default=False)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='user')
+    
    
     class Meta:
             ordering = ['-country'] 

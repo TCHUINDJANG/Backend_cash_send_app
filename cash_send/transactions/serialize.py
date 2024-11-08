@@ -4,7 +4,7 @@ from models import *
 class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
-        fields = ('price', 'devise' , 'statut' , 'user')
+        fields = ('sender', 'receiver' , 'currency_to' , 'currency_from')
 
 class TransactionHistorySerializer(serializers.ModelSerializer):
     class Meta:

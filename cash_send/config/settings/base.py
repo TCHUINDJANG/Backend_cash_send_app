@@ -41,7 +41,7 @@ RESET_PASSWORD_VERIFICATION_URL = 'https://ton-site.com/reset-password/{uid}/{to
 REGISTER_VERIFICATION_URL = 'https://ton-site.com/verify-registration/{uid}/{token}/'
 
 
-VERIFICATION_FROM_EMAIL = 'send_money@.com'
+    # VERIFICATION_FROM_EMAIL = 'paulnicolas519@gmail.com'
 
 # Paramètres rest-registrations
 REST_REGISTRATION = {
@@ -51,7 +51,14 @@ REST_REGISTRATION = {
     'RESET_PASSWORD_VERIFICATION_URL': RESET_PASSWORD_VERIFICATION_URL,  # URL de réinitialisation
     'REGISTER_VERIFICATION_URL': REGISTER_VERIFICATION_URL,  # URL de vérification de l'inscription
     'REGISTER_EMAIL_VERIFICATION_URL': REGISTER_EMAIL_VERIFICATION_URL,  # URL de vérification de l'email
-    'VERIFICATION_FROM_EMAIL': VERIFICATION_FROM_EMAIL,  # Email d'expéditeur
+    # 'VERIFICATION_FROM_EMAIL': VERIFICATION_FROM_EMAIL,  # Email d'expéditeur
+}
+
+
+REST_REGISTRATION = {
+    'REGISTER_VERIFICATION_ENABLED': False,
+    'REGISTER_EMAIL_VERIFICATION_ENABLED': False,
+    'RESET_PASSWORD_VERIFICATION_ENABLED': False,
 }
 
 
@@ -68,6 +75,25 @@ ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  # Force la vérification par email apr
 TWILIO_ACCOUNT_SID = 'ton_account_sid'
 TWILIO_AUTH_TOKEN = 'ton_auth_token'
 TWILIO_PHONE_NUMBER = 'ton_numero_twilio'
+
+
+LANGUAGES = [
+    ('en', 'English'),
+    ('fr', 'Français'),
+    ('de', 'Deutsch'),
+    ('es', 'Español'),
+    # Ajoute d'autres langues selon ton besoin
+]
+
+LANGUAGE_CODE = 'fr'
+
+# Langue par défaut de l'application
+USE_I18N = True
+
+# Configurer le fichier de localisation
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',  # Dossier où tu stockeras les fichiers de traduction
+]
 
 
 # GENERAL
@@ -153,6 +179,8 @@ THIRD_PARTY_APPS = [
     "corsheaders",
     "drf_spectacular",
     "rest_registration",
+    'rest_framework_swagger',
+    'drf_yasg' 
 ]
 
 
@@ -243,6 +271,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#middleware
 MIDDLEWARE = [
+    # "django.middleware.locale.LocaleMiddleware"
     "django.middleware.security.SecurityMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",

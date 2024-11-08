@@ -9,6 +9,24 @@ from django.views.generic import TemplateView
 from drf_spectacular.views import SpectacularAPIView
 from drf_spectacular.views import SpectacularSwaggerView
 from rest_framework.authtoken.views import obtain_auth_token
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from rest_framework import permissions
+
+
+
+
+
+
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Send Money Documentations",
+        default_version='v1',),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
+
 
 urlpatterns = [
     path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
@@ -40,7 +58,24 @@ urlpatterns += [
         SpectacularSwaggerView.as_view(url_name="api-schema"),
         name="api-docs",
     ),
+
+    path('accounts/', include('rest_registration.api.urls')),
+
+    path('docs/', schema_view.with_ui('swagger', cache_timeout=0),name='schema-swagger-ui'),
+    
 ]
+
+# url transactions
+# urlpatterns += [
+#     path('get-list-transaction/' , views.getTransaction , name='getTransaction'),
+#     path('transaction/<int:pk>/' , views.getTransactionById , name='getTransactionById'),
+#     path('transaction/create/' , views.createTransaction , name='createTransaction'),
+#     path('transaction/<int:pk>/update/' , views.updateTransaction , name='updateTransaction'),
+#     path('transaction/<int:pk>/delete/' , views.deleteTransaction , name='deleteTransaction'),
+#     path('transaction/category/search/' , views.SearchApiView),
+    
+# ]
+
 
 if settings.DEBUG:
     # This allows the error pages to be debugged during development, just visit

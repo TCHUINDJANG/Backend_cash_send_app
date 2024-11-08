@@ -11,16 +11,16 @@ router = DefaultRouter()
 
 api_urlpatterns = [
     path('accounts/' , include('rest_registration.api.urls')),
-    path('register/', RegisterUserView.as_view(), name='register'),
-    path('login/', LoginUserView.as_view(), name='login'),
-   path('password-reset/', PasswordResetResquestView.as_view(), name='password-reset'),
+    # path('register/', RegisterUserView.as_view(), name='register'),
+    # path('login/', LoginUserView.as_view(), name='login'),
+    # path('password-reset/', PasswordResetResquestView.as_view(), name='password-reset'),
     # path('password-reset/confirm/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
-    path('update/', UserUpdateView.as_view(), name='user_update'),
-    path('profile/', UserProfileView.as_view(), name='profile'),  
-    path('send-phone-verification/', SendPhoneVerificationCode.as_view(), name='send-phone-verification'),
-    path('verify-phone/', VerifyPhoneNumber.as_view(), name='verify-phone'),
-     path('delete/', DeleteUserView.as_view(), name='delete-user'),
-
+    # path('update/', UserUpdateView.as_view(), name='user_update'),
+    # path('profile/', UserProfileView.as_view(), name='profile'),  
+    # path('send-phone-verification/', SendPhoneVerificationCode.as_view(), name='send-phone-verification'),
+    # path('verify-phone/', VerifyPhoneNumber.as_view(), name='verify-phone'),
+    # path('delete/', DeleteUserView.as_view(), name='delete-user'),
+ 
 ]
 
 # urlpatterns += [
