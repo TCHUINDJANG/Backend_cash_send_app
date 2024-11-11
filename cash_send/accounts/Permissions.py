@@ -60,3 +60,12 @@ class AuthorPermission(permissions.BasePermission):
         if obj.operator == request.user:
             return True
         return False
+
+
+class AuthorProfilePermission(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in ["GET", "OPTIONS" , "HEAD"]:
+            return True
+        if obj.user == request.user:
+            return True
+        return False

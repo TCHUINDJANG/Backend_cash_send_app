@@ -1,5 +1,7 @@
+from typing import Type
 from django.shortcuts import render , redirect
 from rest_framework import viewsets
+from rest_framework.serializers import Serializer
 from .models import * 
 from .serialize import AccountsSerializer , UserRegistrationModelSerializer
 from rest_framework.parsers import JSONParser 
@@ -29,46 +31,59 @@ from rest_registration.api.views.register_email import register_email
 from rest_registration.api.views import register
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .serialize import ProfileSerializer
-from rest_framework_registration.views import PasswordResetView
 import random
 from twilio.rest import Client
-from django.contrib.auth.tokens import default_token_generator
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.conf import settings
+from rest_registration.api.views.profile import ProfileView
+from rest_registration.api.views.register import RegisterView
+from rest_registration.api.views.login import LoginView
+from .Permissions import AuthorProfilePermission
 
 
 
+class RegisterUserView(RegisterView):
+    
+     def get_serializer_class(self) -> type[Serializer]:
+          return super().get_serializer_class()
+     
+     
+class LoginUserView(LoginView):
 
-# class RegisterUserView(RegistrationView):
-#     permission_classes = [AllowAny]
-
-# class LoginUserView(LoginView):
-#     permission_classes = [AllowAny]
+     def get_serializer_class(self) -> Serializer:
+          return super().get_serializer_class()
 
 
 
+class getAllProfileView(ProfileView):
+     permission_classes = [IsAuthenticated , AuthorProfilePermission]
 
-# class UserProfileView(APIView):
-#     permission_classes = [IsAuthenticated]
+     def get_serializer_class(self) -> Serializer:
+          return super().get_serializer_class()   
 
-#     def get(self, request):
-#         profile = Profile.objects.get(user=request.user)
-#         serializer = ProfileSerializer(profile)
-#         return Response(serializer.data)
 
-#     def put(self, request):
-#         profile = Profile.objects.get(user=request.user)
-#         serializer = ProfileSerializer(profile, data=request.data, partial=True)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class updateProfileView(ProfileView):
+     permission_classes = [IsAuthenticated , AuthorProfilePermission]
+
+     def get_serializer_class(self) -> Serializer:
+          return super().get_serializer_class()   
+
     
 
+class deleteProfileView(ProfileView):
+     permission_classes = [IsAuthenticated , AuthorProfilePermission]
 
-# class CustomPasswordResetView(PasswordResetView):
-#     # Personnalisation si nécessaire
-#     pass
+     def get_serializer_class(self) -> Serializer:
+          return super().get_serializer_class()   
+
+    
+
+class getByIdProfileView(ProfileView):
+     permission_classes = [IsAuthenticated , AuthorProfilePermission]
+
+     def get_serializer_class(self) -> Serializer:
+          return super().get_serializer_class()   
+
+    
 
 
 
