@@ -9,16 +9,6 @@ UserModel = get_user_model()
 class UserRegistrationModelSerializer(serializers.ModelSerializer):
 
     password = serializers.CharField(write_only=True)
-
-    def create(self , validated_data):
-        user = UserModel.objects.create_user(
-            username=validated_data['username'],
-            password=validated_data['password'],
-            phone_number=validated_data['phone'],
-            email=validated_data['email'],
-        )
-
-        return user
     
     class Meta:
         model = UserRegistrationModel

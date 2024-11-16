@@ -3,11 +3,12 @@
 
 from pathlib import Path
 
-import environ
+# import configiron
 import os
 from decouple import config
 from . info import *
 import datetime
+
 
 
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -21,12 +22,12 @@ EMAIL_PORT = EMAIL_PORT
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 # cash_send/
 APPS_DIR = BASE_DIR / "cash_send"
-env = environ.Env()
+# config = configiron.config()
 
-READ_DOT_ENV_FILE = env.bool("DJANGO_READ_DOT_ENV_FILE", default=False)
-if READ_DOT_ENV_FILE:
-    # OS environment variables take precedence over variables from .env
-    env.read_env(str(BASE_DIR / ".env"))
+READ_DOT_config_FILE = config("DJANGO_READ_DOT_config_FILE", default=False)
+if READ_DOT_config_FILE:
+    # OS configironment variables take precedence over variables from .config
+    config.read_config(str(BASE_DIR / ".config"))
 
 
 
@@ -46,7 +47,7 @@ REGISTER_VERIFICATION_URL = 'https://ton-site.com/verify-registration/{uid}/{tok
 # Paramètres rest-registrations
 REST_REGISTRATION = {
     'REGISTER_EMAIL_VERIFICATION': True,  # Active la vérification par email pour l'inscription
-    'REGISTER_EMAIL_SUBJECT': 'Bienvenue sur notre plateforme',  # Sujet de l'email de bienvenue
+    'REGISTER_EMAIL_SUBJECT': 'Biconfigenue sur notre plateforme',  # Sujet de l'email de biconfigenue
     'RESET_PASSWORD_EMAIL_SUBJECT': 'Réinitialisation de votre mot de passe',  # Sujet pour la réinitialisation du mot de passe
     'RESET_PASSWORD_VERIFICATION_URL': RESET_PASSWORD_VERIFICATION_URL,  # URL de réinitialisation
     'REGISTER_VERIFICATION_URL': REGISTER_VERIFICATION_URL,  # URL de vérification de l'inscription
@@ -71,7 +72,7 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  # Force la vérification par email après inscription
 
 
-#configuration envoit des sms par le telephone
+#configuration configoit des sms par le telephone
 TWILIO_ACCOUNT_SID = 'ton_account_sid'
 TWILIO_AUTH_TOKEN = 'ton_auth_token'
 TWILIO_PHONE_NUMBER = 'ton_numero_twilio'
@@ -90,7 +91,7 @@ LANGUAGE_CODE = 'fr'
 # Langue par défaut de l'application
 USE_I18N = True
 
-# Configurer le fichier de localisation
+# configurer le fichier de localisation
 LOCALE_PATHS = [
     BASE_DIR / 'locale',  # Dossier où tu stockeras les fichiers de traduction
 ]
@@ -99,7 +100,7 @@ LOCALE_PATHS = [
 # GENERAL
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#debug
-DEBUG = env.bool("DJANGO_DEBUG", False)
+DEBUG = config("DJANGO_DEBUG", False)
 # Local time zone. Choices are
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # though not all of them may be available with every OS.
@@ -127,20 +128,29 @@ LOCALE_PATHS = [str(BASE_DIR / "locale")]
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 
-# DATABASES = {"default": env.db("DATABASE_URL")}
+# DATABASES = {"default": config.db("DATABASE_URL")}
+
+# DATABASES = {
+#     'default' : {
+#         'ENGINE':'django.db.backends.postgresql',
+#         'NAME': 'sendmoney',
+#         'USER':  'postgres',
+#         'PASSWORD': '1234',
+#         'HOST':'localhost',
+#         'PORT':5432,
+#     }
+#  }
+
+# DATABASES["default"]["ATOMIC_REQUESTS"] = True
+
+SITE_ID = 1
 
 DATABASES = {
-    'default' : {
-        'ENGINE':'django.db.backends.postgresql',
-        'NAME': config('POSTGRES_DB'),
-        'USER':  config('POSTGRES_USER'),
-        'PASSWORD': config('POSTGRES_PASSWORD'),
-        'HOST':config('POSTGRES_HOST'),
-        'PORT':config('POSTGRES_PORT'),
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
- }
-
-DATABASES["default"]["ATOMIC_REQUESTS"] = True
+}
 # https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-DEFAULT_AUTO_FIELD
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -157,7 +167,7 @@ DJANGO_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
-    "django.contrib.sites",
+    # "django.contrib.sites",
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # "django.contrib.humanize", # Handy template tags
@@ -187,7 +197,12 @@ THIRD_PARTY_APPS = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        
     ],
+
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+    ]
 }
 
 SIMPLE_JWT = {
@@ -202,17 +217,18 @@ SIMPLE_JWT = {
 
 # REST_REGISTRATION = {
 #     'REGISTER_EMAIL_VERIFICATION': True,  # Activation de la vérification par email
-#     'REGISTER_EMAIL_SUBJECT': 'Bienvenue sur notre plateforme',  # Sujet de l'email d'inscription
+#     'REGISTER_EMAIL_SUBJECT': 'Biconfigenue sur notre plateforme',  # Sujet de l'email d'inscription
 #     'RESET_PASSWORD_EMAIL_SUBJECT': 'Réinitialisation de votre mot de passe',  # Sujet de l'email de réinitialisation
 # }
 
-# Configuration de l'email backend (si nécessaire)
+# configuration de l'email backend (si nécessaire)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Utilise ce backend pour le développement
 
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     ],
 }
 
@@ -357,7 +373,7 @@ X_FRAME_OPTIONS = "DENY"
 # EMAIL
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-backend
-EMAIL_BACKEND = env(
+EMAIL_BACKEND = config(
     "DJANGO_EMAIL_BACKEND",
     default="django.core.mail.backends.smtp.EmailBackend",
 )
@@ -372,9 +388,9 @@ ADMIN_URL = "admin/"
 ADMINS = [("""davidtankeu""", "paulnicolas519@gmail.com")]
 # https://docs.djangoproject.com/en/dev/ref/settings/#managers
 MANAGERS = ADMINS
-# https://cookiecutter-django.readthedocs.io/en/latest/settings.html#other-environment-settings
+# https://cookiecutter-django.readthedocs.io/en/latest/settings.html#other-configironment-settings
 # Force the `admin` sign in process to go through the `django-allauth` workflow
-DJANGO_ADMIN_FORCE_ALLAUTH = env.bool("DJANGO_ADMIN_FORCE_ALLAUTH", default=False)
+DJANGO_ADMIN_FORCE_ALLAUTH = config("DJANGO_ADMIN_FORCE_ALLAUTH", default=False)
 
 # LOGGING
 # ------------------------------------------------------------------------------
@@ -435,7 +451,7 @@ CELERY_WORKER_SEND_TASK_EVENTS = True
 CELERY_TASK_SEND_SENT_EVENT = True
 # django-allauth
 # ------------------------------------------------------------------------------
-ACCOUNT_ALLOW_REGISTRATION = env.bool("DJANGO_ACCOUNT_ALLOW_REGISTRATION", True)
+ACCOUNT_ALLOW_REGISTRATION = config("DJANGO_ACCOUNT_ALLOW_REGISTRATION", True)
 # https://docs.allauth.org/en/latest/account/configuration.html
 ACCOUNT_AUTHENTICATION_METHOD = "email"
 # https://docs.allauth.org/en/latest/account/configuration.html

@@ -30,24 +30,47 @@ from rest_registration.api.views.profile import profile
 from rest_registration.api.views.register_email import register_email
 from rest_registration.api.views import register
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from django.contrib.auth.signals import user_logged_in, user_login_failed
 from .serialize import ProfileSerializer
+from django.views.decorators.csrf import csrf_exempt
 import random
 from twilio.rest import Client
 from django.conf import settings
 from rest_registration.api.views.profile import ProfileView
 from rest_registration.api.views.register import RegisterView
-from rest_registration.api.views.login import LoginView
+from rest_registration.api.views.login import LoginView , perform_login
+from rest_registration.utils.responses import get_ok_response
 from .Permissions import AuthorProfilePermission
-
+from rest_framework.request import Request
+from rest_registration.settings import registration_settings
+from rest_registration.exceptions import LoginInvalid, UserNotFound
 
 
 class RegisterUserView(RegisterView):
     
      def get_serializer_class(self) -> type[Serializer]:
-          return super().get_serializer_class()
+          return UserRegistrationModelSerializer
      
      
 class LoginUserView(LoginView):
+     @csrf_exempt
+     def post(self, request: Request) -> Response:
+        '''
+        Logs in the user via given login and password.
+        '''
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        login_authenticator = registration_settings.LOGIN_AUTHENTICATOR
+        try:
+            user = login_authenticator(serializer.validated_data, serializer=serializer)
+        except UserNotFound:
+            raise LoginInvalid() from None
+
+        extra_data = perform_login(request, user, credentials=serializer.validated_data)
+
+        return get_ok_response(_("Login successful"), extra_data=extra_data)
+
+
 
      def get_serializer_class(self) -> Serializer:
           return super().get_serializer_class()
@@ -58,14 +81,14 @@ class getAllProfileView(ProfileView):
      permission_classes = [IsAuthenticated , AuthorProfilePermission]
 
      def get_serializer_class(self) -> Serializer:
-          return super().get_serializer_class()   
+          return ProfileSerializer  
 
 
 class updateProfileView(ProfileView):
      permission_classes = [IsAuthenticated , AuthorProfilePermission]
 
      def get_serializer_class(self) -> Serializer:
-          return super().get_serializer_class()   
+          return ProfileSerializer   
 
     
 
@@ -73,7 +96,7 @@ class deleteProfileView(ProfileView):
      permission_classes = [IsAuthenticated , AuthorProfilePermission]
 
      def get_serializer_class(self) -> Serializer:
-          return super().get_serializer_class()   
+          return ProfileSerializer  
 
     
 
@@ -81,7 +104,7 @@ class getByIdProfileView(ProfileView):
      permission_classes = [IsAuthenticated , AuthorProfilePermission]
 
      def get_serializer_class(self) -> Serializer:
-          return super().get_serializer_class()   
+          return ProfileSerializer   
 
     
 

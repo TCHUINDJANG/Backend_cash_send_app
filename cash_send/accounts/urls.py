@@ -6,16 +6,15 @@ from django.urls import path, include
 router = DefaultRouter()
 # router.register(r'^accounts/register', AccountviewViewSet, basename='register')
 
- from  rest_registration.api.views import  change_password 
+from  rest_registration.api.views import  change_password ,login
  
 
 
 api_urlpatterns = [
     # path('accounts/' , include('rest_registration.api.urls')),
     # path('register/', RegisterUserView.as_view(), name='register'),
-    # path('login/', LoginUserView.as_view(), name='login'),
     # path('password-reset/', PasswordResetResquestView.as_view(), name='password-reset'),
-    path('accounts/login', LoginUserView.as_view(), name='login'),
+    path('accounts/login/', login, name='login'),
     path('accounts/register', RegisterUserView.as_view(), name='register'),
     path('accounts/profile/', getAllProfileView.as_view(), name='profile'),  
     path('accounts/profile/<int:pk>/', updateProfileView.as_view(), name='update-profile'),

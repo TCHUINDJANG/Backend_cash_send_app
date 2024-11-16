@@ -2,7 +2,6 @@
 from .base import *  # noqa: F403
 from .base import INSTALLED_APPS
 from .base import MIDDLEWARE
-from .base import env
 from decouple import config
 
 # GENERAL
@@ -10,7 +9,7 @@ from decouple import config
 # https://docs.djangoproject.com/en/dev/ref/settings/#debug
 DEBUG = True
 # https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
-SECRET_KEY = env(
+SECRET_KEY = config(
     "DJANGO_SECRET_KEY",
     default="SujvCC0hGsvQK8gWReBDBKcjVLObakS9qjrmFVyrPnb8Yyhv4TP5i1VAUPjTksm5",
 )
@@ -30,7 +29,7 @@ CACHES = {
 # EMAIL
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-host
-EMAIL_HOST = env("EMAIL_HOST", default="mailpit")
+EMAIL_HOST = config("EMAIL_HOST", default="mailpit")
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-port
 EMAIL_PORT = 1025
 
@@ -41,7 +40,7 @@ INSTALLED_APPS += ["debug_toolbar"]
 # https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#middleware
 MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]
 # https://django-debug-toolbar.readthedocs.io/en/latest/configuration.html#debug-toolbar-config
-DEBUG_TOOLBAR_CONFIG = {
+DEBUG_TOOLBAR_config = {
     "DISABLE_PANELS": [
         "debug_toolbar.panels.redirects.RedirectsPanel",
         # Disable profiling panel due to an issue with Python 3.12:
@@ -59,7 +58,7 @@ if config("USE_DOCKER") == "yes":
     INTERNAL_IPS += [".".join(ip.split(".")[:-1] + ["1"]) for ip in ips]
     # RunServerPlus
     # ------------------------------------------------------------------------------
-    # This is a custom setting for RunServerPlus to fix reloader issue in Windows docker environment
+    # This is a custom setting for RunServerPlus to fix reloader issue in Windows docker configironment
     # Werkzeug reloader type [auto, watchdog, or stat]
     RUNSERVERPLUS_POLLER_RELOADER_TYPE = 'stat'
     # If you have CPU and IO load issues, you can increase this poller interval e.g) 5
